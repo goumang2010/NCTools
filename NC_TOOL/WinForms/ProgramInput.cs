@@ -19,22 +19,27 @@ namespace NC_TOOL
     {
         DBInfo dbinfo;
         NCcodeList unilist;
-       
-        private void SetWrong(int line,string message)
-        {
-
-            unilist.wronglist[message] = line;
-            listBox2.DataSource= unilist.wronglist.Keys.ToList();
-
-        }
         public program_input()
         {
             InitializeComponent();
-            
-           dbinfo = new DBInfo();
-           unilist = new NCcodeList(dbinfo);
+            dbinfo = new DBInfo();
+            unilist = new NCcodeList(dbinfo);
+            // listBox2.DataSource = unilist.ShowWrongList;
+
+            listBox2.DataBindings.Add("DataSource", unilist, "ShowWrongList");
+            listBox1.DataBindings.Add("DataSource", unilist, "ShowNCList");
 
         }
+
+
+
+        private void SetWrong(int line,string message)
+        {
+
+            unilist.AddToWrongList(message,line);
+            
+        }
+
         public List<string> program_part = new List<string>();
         string productnametrim;
         string prodchnname;
@@ -54,6 +59,8 @@ namespace NC_TOOL
 
         private void program_input_Load(object sender, EventArgs e)
         {
+
+
 
 
 
@@ -275,7 +282,7 @@ namespace NC_TOOL
 
         private bool checkdupi()
         {
-            clearall();
+            //ClearWrongList();
 
             try
             {
@@ -288,14 +295,14 @@ namespace NC_TOOL
             }
            
           
-            listBox1.DataSource = unilist;
-            if(unilist.wronglist.Count==0)
+           // listBox1.DataSource = unilist;
+            if(unilist.ShowWrongList.Count==0)
             {
                 return true;
             }
             else
             {
-                listBox2.DataSource = unilist.wronglist.Keys.ToList();
+              
                 return false;
             }
             
@@ -356,11 +363,11 @@ namespace NC_TOOL
             }
             return abc;
         }
-        private void clearall()
+        private void ClearWrongList()
         {
+            unilist.ClearWrongList();
 
-            
-            listBox2.DataSource = null;
+           
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -382,12 +389,11 @@ namespace NC_TOOL
 
         private void button3_Click(object sender, EventArgs e)
         {
-            listBox1.DataSource = null;
+           // listBox1.DataSource = null;
 
-            unilist.wronglist.Clear();
-            listBox1.Items.Clear();
-           // listBox2.Items.Clear();
-
+             ClearWrongList();
+         //   listBox1.Items.Clear();
+         
            
            // abc.Clear();
             //abc = new List<string>();
@@ -403,11 +409,7 @@ namespace NC_TOOL
            
         }
 
-        private void listBox2_SelectedIndexChanged(object sender, EventArgs e)
-        {
 
-            
-        }
         private string  listtotext(List<string> abc)
         {
             
@@ -429,12 +431,12 @@ namespace NC_TOOL
 
         private void button7_Click(object sender, EventArgs e)
         {
-            List<string> abc = (List<string>)listBox1.DataSource;
+            List<string> abc = unilist.NCList;
             abc.RemoveAt(listBox1.SelectedIndex);
-            listBox1.DataSource = null;
-            listBox1.DataSource = abc;
+            //listBox1.DataSource = null;
+          //  listBox1.DataSource = abc;
             listtotext(abc);
-            listBox2.Items.Clear();
+            ClearWrongList();
             //textBox1.Text=listBox1.Items.
         }
 
@@ -450,13 +452,13 @@ namespace NC_TOOL
             {
                 string firstrow = "(MSG,START PROGRAM PART " + (comboBox1.SelectedIndex + 1).ToString() + " :"+comboBox1.SelectedValue+")";
                 
-                unilist.Insert(0,firstrow);
+                unilist.NCList.Insert(0,firstrow);
             }
 
             if (comboBox1.Visible == true && checkBox3.Checked == true)
             {
                 string endrow = "(MSG,END PROGRAM PART " + (comboBox1.SelectedIndex + 1).ToString() + " :" + comboBox1.SelectedValue + ")";
-                    unilist.Insert(unilist.Count()-1, endrow);
+                    unilist.NCList.Insert(unilist.NCList.Count()-1, endrow);
              }
                 unilist.SaveFile(ofd.FileName,checkBox1.Checked);
             System.Diagnostics.Process pro = new System.Diagnostics.Process();
@@ -477,9 +479,9 @@ namespace NC_TOOL
 
         private void CheckAll(Action<int> proc)
         {
-            clearall();
+            ClearWrongList();
             comboBox1.SelectedIndex = -1;
-            listBox1.DataSource = null;
+           // listBox1.DataSource = null;
 
             NCcodeList abc = new NCcodeList(dbinfo);
             for (int i = 0; i < comboBox1.Items.Count; i++)
@@ -496,9 +498,9 @@ namespace NC_TOOL
         }
         private void checkAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            clearall();
+            ClearWrongList();
             comboBox1.SelectedIndex = -1;
-            listBox1.DataSource = null;
+         //   listBox1.DataSource = null;
             
             NCcodeList abc = new NCcodeList(dbinfo);
 
@@ -508,13 +510,13 @@ namespace NC_TOOL
                    var templist=new NCcodeList(dbinfo);
                    templist.ImportFromString(DbHelperSQL.getlist("select 程序Program from " + productnametrim + " where UUID='" + pppart + "'").First());
                    templist.Check(true, false, true);
-                   abc.AddRange(templist);
+                   abc.NCList.AddRange(templist.NCList);
 
                };
            
            CheckAll(proc);
 
-            unilist = abc;
+            unilist.NCList = abc.NCList;
              checkdupi();
             comboBox1.SelectedIndex = -1;
 
@@ -711,7 +713,7 @@ namespace NC_TOOL
                 List<string> tempabc = new List<string>();
 
               
-                string savefolder = localMethod.InfoPath +prodchnname+"_"+ productnametrim.Replace("process","-001") + "\\NC\\";
+                string savefolder = localMethod.GetConfigValue("InfoPath") +prodchnname+"_"+ productnametrim.Replace("process","-001") + "\\NC\\";
 
                 if (!System.IO.Directory.Exists(savefolder))
                 {
@@ -723,13 +725,13 @@ namespace NC_TOOL
                 string newfolder = savefolder + "old";
                 rm.moveto(newfolder);
 
-                clearall();
+                ClearWrongList();
                 comboBox1.SelectedIndex = -1;
 
 
-                clearall();
+                ClearWrongList();
                 comboBox1.SelectedIndex = -1;
-                listBox1.DataSource = null;
+               // listBox1.DataSource = null;
 
                 NCcodeList wholelist = new NCcodeList(dbinfo);
 
@@ -755,11 +757,11 @@ namespace NC_TOOL
                     head.Add("(MSG,START PROGRAM SEGMENT " + (i + 1).ToString() + " :" + pppart + ")");
                     head.Add("(MSG,MAKE SURE THE SEALANT TIP AND LOWER ANVIL:" + partDic[pppart] + ")");
                     templist.ImportFromString(DbHelperSQL.getlist("select 程序Program from " + productnametrim + " where UUID='" + pppart + "'").First(),false);
-                    templist.InsertRange(1, head);
-                    templist.Insert(templist.Count-2,"(MSG,END PROGRAM SEGMENT " + (comboBox1.SelectedIndex + 1).ToString() + " :" + comboBox1.SelectedValue + ")");
+                    templist.NCList.InsertRange(1, head);
+                    templist.NCList.Insert(templist.NCList.Count-2,"(MSG,END PROGRAM SEGMENT " + (comboBox1.SelectedIndex + 1).ToString() + " :" + comboBox1.SelectedValue + ")");
                     string filename = "SEG_" + (i + 1).ToString() + "_" + pppart;
                     string filepath = savefolder + filename;
-                    wholelist.AddRange(templist);
+                    wholelist.NCList.AddRange(templist.NCList);
                    if(!templist.SaveFile(filepath))
                     {
                         throw new NCException("写入文件" + filename + "失败");
@@ -774,7 +776,7 @@ namespace NC_TOOL
                 string filenameall = this.Text;
                 string NCpath = savefolder + filenameall;
                 wholelist.SaveFile(NCpath);
-                if (!wholelist.WriteFile(NCpath))
+                if (!wholelist.NCList.WriteFile(NCpath))
                 {
                     throw new NCException("写入文件" + filenameall + "失败");
                 }
@@ -822,7 +824,7 @@ namespace NC_TOOL
 
         private void button2_Click(object sender, EventArgs e)
         {
-            clearall();
+            ClearWrongList();
         }
 
         private void databaseToolStripMenuItem_Click(object sender, EventArgs e)
@@ -902,7 +904,7 @@ namespace NC_TOOL
             {
                 try
                 {
-                    int indexkey = unilist.wronglist[listBox2.SelectedItem.ToString()];
+                    int indexkey =unilist.FetchWrongLineNum(listBox2.SelectedItem.ToString());
                     listBox1.SelectedIndex = indexkey;
                     listBox1.TopIndex = indexkey;
                 }

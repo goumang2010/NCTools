@@ -1,6 +1,7 @@
 ﻿using mysqlsolution;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -8,21 +9,85 @@ using System.Text.RegularExpressions;
 
 namespace NC_TOOL
 {
-    public  class NCcodeList:List<string>
+    public  class NCcodeList:  INotifyPropertyChanged
     {
         private IDBInfo dbinfo;
+        private List<string> codeList = new List<string>();
+        public event PropertyChangedEventHandler PropertyChanged;
 
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            var handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+            
+        }
         //property
 
         //the installed fasterners this NC codes covers
         public Dictionary<string, int> fastList { get; set; }
         public Dictionary<string, int> drillList { get; set; }
-        public Dictionary<string, int> wronglist { get; set; }
+        public List<string> NCList
+        {
+            get
+            {
+
+                return codeList;
+            }
+            set
+            {
+                codeList = value;
+            }
+
+            
+        }
+        public List<string> ShowNCList
+        {
+            get
+            {
+                //For biond the list box,every time generate a new list
+                return codeList.ToList();
+            }
+
+
+        }
+        #region WrongList
+        private Dictionary<string, int> wronglist= new Dictionary<string, int>();
        
-        public    NCcodeList(IDBInfo dbInfo)
+        public List<string> ShowWrongList
+        {
+            get
+            {
+                return wronglist.Keys.ToList();
+            }
+        }
+        public void AddToWrongList(string msg,int i)
+        {
+            wronglist[msg] = i;
+            OnPropertyChanged("ShowWrongList");
+        }
+        public int FetchWrongLineNum(string info)
+        {
+            if(wronglist.ContainsKey(info))
+            {
+                return wronglist[info];
+
+            }
+            return -1;
+            
+        }
+        public void ClearWrongList()
+        {
+            wronglist.Clear();
+            OnPropertyChanged("ShowWrongList");
+        }
+
+        #endregion
+        public NCcodeList(IDBInfo dbInfo)
         {
             dbinfo = dbInfo;
-            wronglist = new Dictionary<string, int>();
         }
 
 
@@ -31,14 +96,14 @@ namespace NC_TOOL
 
           
             //get the geoset
-            int geosetindex = this.FindLastIndex(pp - 1,s=> s.ToUpper().Contains("START GEOSET"));
-            string geosetstr = this.ElementAt(geosetindex).Split(':')[1];
+            int geosetindex = codeList.FindLastIndex(pp - 1,s=> s.ToUpper().Contains("START GEOSET"));
+            string geosetstr = codeList.ElementAt(geosetindex).Split(':')[1];
             geosetstr = geosetstr.Remove(geosetstr.Length - 1);
             geosetstr = geosetstr.Trim();
 
             //get the operation
-            int opindex = this.FindLastIndex(pp - 1, s=> s.ToUpper().Contains("START OPERATION"));
-            string opstr = this.ElementAt(opindex).Split(':')[1];
+            int opindex = codeList.FindLastIndex(pp - 1, s=> s.ToUpper().Contains("START OPERATION"));
+            string opstr = codeList.ElementAt(opindex).Split(':')[1];
             opstr = opstr.Remove(opstr.Length - 1);
             opstr = opstr.Trim();
             var pf = instcoodrow[1].Replace(")", "");
@@ -75,28 +140,28 @@ namespace NC_TOOL
 
             var fstenerT = dbinfo.DBfstTable;
 
-            int McodeRow = this.FindIndex(0, Moperation);
+            int McodeRow = codeList.FindIndex(0, Moperation);
             int CoordRow = 0;
             var installlistfull = new List<NCpointCoord>();
             int uid = 0;
 
             while (McodeRow > 0)
             {
-                CoordRow = this.FindLastIndex(McodeRow - 1, s => (s.Contains("X") && s.Contains("Y") && s.Contains("Z")));
+                CoordRow = codeList.FindLastIndex(McodeRow - 1, s => (s.Contains("X") && s.Contains("Y") && s.Contains("Z")));
                 //Split the coord and pf name
-                string[] instcoodrow = this.ElementAt(CoordRow).Split('(');
+                string[] instcoodrow = codeList.ElementAt(CoordRow).Split('(');
                 //Create coord infomation
                 var instcood = CreatPointInfo(instcoodrow, CoordRow);
 
                 string Tcode;
-                int TcodeRow = this.FindLastIndex(McodeRow - 1, s => s.Contains("M56"));
+                int TcodeRow = codeList.FindLastIndex(McodeRow - 1, s => s.Contains("M56"));
                 if (TcodeRow < 0)
                 {
                     throw new NCException("这不是完整的程序，没有包含选钉代码");
                 }
                 else
                 {
-                    Tcode = this[TcodeRow].Replace("M56T", "");
+                    Tcode = codeList[TcodeRow].Replace("M56T", "");
                 }
                 //Get the fasterner name per dictionary
                 string fstnameT = fstenerT.getFastName(System.Convert.ToInt16(Tcode));
@@ -139,15 +204,18 @@ namespace NC_TOOL
                     //If there is no duplicate point,then add it to the set
                     installlistfull.Add(instcood);
                 }
-                McodeRow = this.FindIndex(McodeRow + 1, Moperation);
+                McodeRow = codeList.FindIndex(McodeRow + 1, Moperation);
 
             }
+            
+            OnPropertyChanged("ShowWrongList");
+
             return installlistfull;
         }
       public string Check(bool erroroutput = true,bool report=false,bool productref=true)
         {
 
-            wronglist = new Dictionary<string, int> ();
+            ClearWrongList();
            
             var installlistfull = CheckPoints(x => x.Contains("M60") || x.Contains("M62"));
             var drilllistfull = CheckPoints(x => x.Contains("M61") || x.Contains("M63"));
@@ -264,21 +332,23 @@ namespace NC_TOOL
                  display = display + "总钻孔数量：" + drlqty.ToString() + " TVA:" + tvadrillqty;
                 fastList = installsta.ToDictionary(a => a.Key, b => b.Value);
                 drillList=drillsta.ToDictionary(a => a.Key, b => b.Value);
-
+                OnPropertyChanged("ShowWrongList");
+                OnPropertyChanged("ShowNCList");
                 return display;
 
             }
+
             return "";
 
-          //  label6.Text = display;
-          // listBox1.DataSource = this;
+            //  label6.Text = display;
+            // listBox1.DataSource = this;
 
 
         }
         public override string ToString()
         {
             string progstr = "";
-            this.ForEach(p => progstr += p);
+            codeList.ForEach(p => progstr += p);
             return progstr;
         }
         public string BaseRepair(IEnumerable<string> rowprocess)
@@ -317,7 +387,7 @@ namespace NC_TOOL
                 }
                 else
                 {
-                    var ff = fstenerTR.Where(p => p.TCode == System.Convert.ToInt16(FindLast(x => x.Contains("M56")).Replace("M56T", "")));
+                    var ff = fstenerTR.Where(p => p.TCode == System.Convert.ToInt16(codeList.FindLast(x => x.Contains("M56")).Replace("M56T", "")));
                     if (ff.Count() == 0)
                     {
                         throw new NCException("代码中出现的紧固件未在TVA中出现");
@@ -335,14 +405,16 @@ namespace NC_TOOL
 
                 if (tempstr != "")
                 {
-                    Add(tempstr);
+                    codeList.Add(tempstr);
                     showStr += tempstr + "\r\n";
                 }
 
 
 
             }
-
+            
+           // OnPropertyChanged("ShowNCList");
+            ClearWrongList();
             return showStr;
 
         }
@@ -350,7 +422,7 @@ namespace NC_TOOL
         {
             if(ifclear)
             {
-                this.Clear();
+                codeList.Clear();
             }
          
             var rowprocess = localMethod.ReadLines(filepath);
@@ -364,7 +436,7 @@ namespace NC_TOOL
         {
             if (ifclear)
             {
-                this.Clear();
+                codeList.Clear();
             }
         
             var rowprocess = content.Split(new Char[2] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries).AsEnumerable() ;
@@ -378,11 +450,11 @@ namespace NC_TOOL
         {
            
             int indexNo = 0;
-            List<string> outputlist=this;
+            List<string> outputlist= codeList;
 
             if (ifSeq)
             {
-                outputlist=   this.Select(delegate (string ppp)
+                outputlist=   codeList.Select(delegate (string ppp)
                 {
                     if (ppp.ElementAt(0) == 'X' || ppp.ElementAt(0) == 'M' || ppp.ElementAt(0) == 'G' || ppp.Contains("MSG"))
                     {

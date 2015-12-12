@@ -214,6 +214,7 @@ namespace NC_TOOL
            var f1 = new program_input();
             f1.inputValue = textBox1.Text;
             f1.Show();
+        
             this.Close();
 
 

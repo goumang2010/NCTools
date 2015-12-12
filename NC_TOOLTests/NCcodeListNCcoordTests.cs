@@ -15,7 +15,7 @@ namespace NC_TOOL.Tests
         {
            var ls= ImportFromFileTest();
             ls.Check(true, true, false);
-            Assert.AreEqual(ls.wronglist.Count(), 128);
+            Assert.AreEqual(ls.ShowWrongList.Count(), 128);
         }
 
         [TestMethod()]
@@ -27,7 +27,7 @@ namespace NC_TOOL.Tests
             NCcodeList ncls = new NCcodeList((IDBInfo)dd.GetService(typeof(IDBInfo)));
 
             ncls.ImportFromFile(testpath);
-            Assert.AreNotEqual(ncls.Count(),0);
+            Assert.AreNotEqual(ncls.NCList.Count(),0);
             return ncls;
         }
     }
