@@ -36,8 +36,6 @@
             this.button5 = new System.Windows.Forms.Button();
             this.listBox2 = new System.Windows.Forms.ListBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.button6 = new System.Windows.Forms.Button();
-            this.button7 = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.button8 = new System.Windows.Forms.Button();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
@@ -58,6 +56,7 @@
             this.button4 = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -139,29 +138,9 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(55, 571);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(137, 12);
+            this.label1.Size = new System.Drawing.Size(113, 12);
             this.label1.TabIndex = 24;
-            this.label1.Text = "duplicate points list:";
-            // 
-            // button6
-            // 
-            this.button6.Location = new System.Drawing.Point(444, 702);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(119, 45);
-            this.button6.TabIndex = 25;
-            this.button6.Text = "find the first";
-            this.button6.UseVisualStyleBackColor = true;
-            this.button6.Click += new System.EventHandler(this.button6_Click);
-            // 
-            // button7
-            // 
-            this.button7.Location = new System.Drawing.Point(444, 651);
-            this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(119, 45);
-            this.button7.TabIndex = 26;
-            this.button7.Text = "Del selected rows";
-            this.button7.UseVisualStyleBackColor = true;
-            this.button7.Click += new System.EventHandler(this.button7_Click);
+            this.label1.Text = "Error points list:";
             // 
             // label2
             // 
@@ -347,11 +326,21 @@
             this.label7.TabIndex = 39;
             this.label7.Text = "TVA信息：";
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(442, 600);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(113, 12);
+            this.label3.TabIndex = 40;
+            this.label3.Text = "Error point info：";
+            // 
             // program_input
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(666, 775);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.button4);
@@ -362,8 +351,6 @@
             this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.button8);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.button7);
-            this.Controls.Add(this.button6);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.listBox2);
             this.Controls.Add(this.button5);
@@ -394,8 +381,6 @@
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.ListBox listBox2;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button button6;
-        private System.Windows.Forms.Button button7;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button button8;
         private System.Windows.Forms.CheckBox checkBox1;
@@ -416,5 +401,6 @@
         private System.Windows.Forms.ToolStripMenuItem operationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fillParaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reTrimToolStripMenuItem;
+        private System.Windows.Forms.Label label3;
     }
 }

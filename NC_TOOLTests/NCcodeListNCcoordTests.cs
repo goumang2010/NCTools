@@ -15,7 +15,7 @@ namespace NC_TOOL.Tests
         {
            var ls= ImportFromFileTest();
             ls.Check(true, true, false);
-            Assert.AreEqual(ls.ShowWrongList.Count(), 128);
+            Assert.AreEqual(ls.ShowWrongList.Count(), 130);
         }
 
         [TestMethod()]

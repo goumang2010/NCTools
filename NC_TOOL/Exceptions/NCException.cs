@@ -5,7 +5,7 @@ using System.Text;
 
 namespace NC_TOOL
 {
-  public  class NCException : ApplicationException
+  public  class NCException : Exception
     {
       
         public NCException() { }

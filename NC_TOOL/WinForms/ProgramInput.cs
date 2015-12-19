@@ -24,8 +24,6 @@ namespace NC_TOOL
             InitializeComponent();
             dbinfo = new DBInfo();
             unilist = new NCcodeList(dbinfo);
-            // listBox2.DataSource = unilist.ShowWrongList;
-
             listBox2.DataBindings.Add("DataSource", unilist, "ShowWrongList");
             listBox1.DataBindings.Add("DataSource", unilist, "ShowNCList");
 
@@ -44,17 +42,17 @@ namespace NC_TOOL
         string productnametrim;
         string prodchnname;
  
-        Dictionary<string, int> allfastlist = new Dictionary<string, int>();
+        //Dictionary<string, int> allfastlist = new Dictionary<string, int>();
         //int  tvaqty = 0;
         bool ifoldprogram = true;
 
-        Dictionary<string, int> alldrilllist = new Dictionary<string, int>();
-        Dictionary<int, string> fstenerT = new Dictionary<int, string>();
+      //  Dictionary<string, int> alldrilllist = new Dictionary<string, int>();
+      //  Dictionary<int, string> fstenerT = new Dictionary<int, string>();
         //T代码和校准代码对照
-        Dictionary<int, string> fstenerTR = new Dictionary<int, string>();
-        Dictionary<string, int> fastlist = new Dictionary<string, int>();
-        Dictionary<string, int> drilllist = new Dictionary<string, int>();
-        int tvadrillqty = 0;
+       // Dictionary<int, string> fstenerTR = new Dictionary<int, string>();
+      //  Dictionary<string, int> fastlist = new Dictionary<string, int>();
+      //  Dictionary<string, int> drilllist = new Dictionary<string, int>();
+      //  int tvadrillqty = 0;
 
 
         private void program_input_Load(object sender, EventArgs e)
@@ -113,7 +111,7 @@ namespace NC_TOOL
             {
                 int tempqty=System.Convert.ToInt16(pp.Value.ToString());
                 fstdisplay = fstdisplay +pp.Key+ "  ： " + pp.Value.ToString() + "\r\n";
-                allfastlist.Add(pp.Key.ToString(),tempqty);
+              //  allfastlist.Add(pp.Key.ToString(),tempqty);
                
               
             }
@@ -123,9 +121,9 @@ namespace NC_TOOL
             {
                 int tempqty = System.Convert.ToInt16(pp.Value.ToString());
                 fstdisplay = fstdisplay + pp.Key + "  ： " + pp.Value + "\r\n";
-                alldrilllist.Add(pp.Key.ToString(), tempqty);
+              //  alldrilllist.Add(pp.Key.ToString(), tempqty);
 
-                tvadrillqty = tvadrillqty + tempqty;
+               // tvadrillqty = tvadrillqty + tempqty;
                 // tvaqty=
             }
 
@@ -164,8 +162,8 @@ namespace NC_TOOL
                 DataTable fsttemp = DbHelperSQL.Query("select Fasteners from 紧固件列表").Tables[0];
                 foreach (DataRow pp in fsttemp.Rows)
                 {
-                    allfastlist.Add(pp[0].ToString(), 0);
-                    alldrilllist.Add(pp[0].ToString(), 0);
+                   // allfastlist.Add(pp[0].ToString(), 0);
+                   // alldrilllist.Add(pp[0].ToString(), 0);
 
 
                 }
@@ -182,12 +180,12 @@ namespace NC_TOOL
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             ifoldprogram = true;
-
+            textBox1.Text = "";
             if(comboBox1.SelectedIndex!=-1)
             {       
             string pppart = comboBox1.SelectedValue.ToString();
               unilist.ImportFromString( DbHelperSQL.getlist("select 程序Program from " + productnametrim + " where UUID='" + pppart + "'").First() );
-               checkdupi();
+              CheckAndShow();
             }
             }
         private static bool installpoint(String s)
@@ -280,23 +278,14 @@ namespace NC_TOOL
         
         }
 
-        private bool checkdupi()
+        private bool CheckAndShow()
         {
             //ClearWrongList();
 
-            try
-            {
-                label6.Text=    unilist.Check(report: checkBox2.Checked, productref: menuStrip1.Visible);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("unilist.Check引发异常"+ex.GetType().ToString() + ":" + ex.Message);
 
-            }
-           
-          
-           // listBox1.DataSource = unilist;
-            if(unilist.ShowWrongList.Count==0)
+            label6.Text = CheckAndShow(unilist, report: checkBox2.Checked, productref: menuStrip1.Visible);
+
+            if (unilist.ShowWrongList.Count==0)
             {
                 return true;
             }
@@ -308,61 +297,23 @@ namespace NC_TOOL
             
 
         }
-
-        private List<string> creatlist(string text)
+        private string CheckAndShow(NCcodeList abc,bool report, bool productref)
         {
-            string[] rowprocess;
-            List<string> abc = new List<string>();
-
-
-            rowprocess = text.Split(new Char[2] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (string kk in rowprocess)
+            try
             {
-                string tempstr;
-                tempstr = kk.Trim();
-                tempstr = Regex.Replace(tempstr, @"^N[0-9]*", "", RegexOptions.None);
-
-                if (!tempstr.Contains("(MSG"))
-                {
-                    tempstr = tempstr.Replace(" ", "");
-                }
-                tempstr = tempstr.Trim();
-               //2015.9.24 Remove M02 for each part
-                if (tempstr == "M02")
-                {
-                    continue;
-                }
-
-
-                //修复换刀T代码bug
-                if (tempstr.Contains("M56") && (!tempstr.Contains("T")))
-                {
-                    tempstr = tempstr.Replace("M56", "M56T");
-                }
-                
-                //解决M34N/A bug(强制校准bug)
-                if (!tempstr.Contains("M34N/A"))
-                {
-                    tempstr = tempstr.Replace("N/A", "");
-                }
-                else
-                {
-                    tempstr = "M34" + fstenerTR[System.Convert.ToInt16(abc.FindLast(findtcode).Replace("M56T", ""))];
-
-                }
-
-           
-
-
-                if (tempstr != "")
-                {
-                    abc.Add(tempstr);
-                }
+                return abc.Check(report: report, productref: productref);
+                //unilist.AddRangeToWrongList(abc.ShowWrongList);
+              
+            }
+            catch (NCException ex)
+            {
+                MessageBox.Show("Check引发异常" + ex.GetType().ToString() + ":" + ex.Message);
 
             }
-            return abc;
+            return "";
         }
+
+
         private void ClearWrongList()
         {
             unilist.ClearWrongList();
@@ -377,13 +328,17 @@ namespace NC_TOOL
             {
                 unilist.ImportFromString(textBox1.Text);
           
-               if( checkdupi())
+               if( CheckAndShow())
                 {
                     MessageBox.Show("已检查完成，无语法问题");
                 }
                
                 ifoldprogram = false;
                 
+            }
+            else
+            {
+                MessageBox.Show("文本框里什么也没有，你在逗我？如果只是想重新检查，点击上面的Operation->Re-Trim");
             }
         }
 
@@ -410,17 +365,10 @@ namespace NC_TOOL
         }
 
 
-        private string  listtotext(List<string> abc)
+        private void  ListToText()
         {
-            
-            string newtext = "";
+            textBox1.Text= unilist.ToString();
 
-            foreach( string ddd in abc)
-            {
-                newtext = newtext + ddd + "\r\n";
-            }
-            textBox1.Text = newtext;
-            return newtext;
         }
 
         private void button6_Click(object sender, EventArgs e)
@@ -429,38 +377,29 @@ namespace NC_TOOL
             listBox1.SelectedIndex = listBox1.TopIndex;
         }
 
-        private void button7_Click(object sender, EventArgs e)
-        {
-            List<string> abc = unilist.NCList;
-            abc.RemoveAt(listBox1.SelectedIndex);
-            //listBox1.DataSource = null;
-          //  listBox1.DataSource = abc;
-            listtotext(abc);
-            ClearWrongList();
-            //textBox1.Text=listBox1.Items.
-        }
+
 
         private void button8_Click(object sender, EventArgs e)
         {
             SaveFileDialog ofd = new SaveFileDialog();
-           
+            var templist = new NCcodeList(dbinfo);
            if( ofd.ShowDialog() == DialogResult.OK)
            {
 
-
+                templist.NCList.AddRange(unilist.NCList);
             if (comboBox1.Visible==true&& checkBox3.Checked==true)
             {
                 string firstrow = "(MSG,START PROGRAM PART " + (comboBox1.SelectedIndex + 1).ToString() + " :"+comboBox1.SelectedValue+")";
-                
-                unilist.NCList.Insert(0,firstrow);
+
+                    templist.NCList.Insert(1,firstrow);
             }
 
             if (comboBox1.Visible == true && checkBox3.Checked == true)
             {
                 string endrow = "(MSG,END PROGRAM PART " + (comboBox1.SelectedIndex + 1).ToString() + " :" + comboBox1.SelectedValue + ")";
-                    unilist.NCList.Insert(unilist.NCList.Count()-1, endrow);
+                    templist.NCList.Insert(templist.NCList.Count()-2, endrow);
              }
-                unilist.SaveFile(ofd.FileName,checkBox1.Checked);
+                templist.SaveFile(ofd.FileName,checkBox1.Checked);
             System.Diagnostics.Process pro = new System.Diagnostics.Process();
             pro.StartInfo.FileName = "notepad.exe";
             
@@ -509,7 +448,9 @@ namespace NC_TOOL
                    string pppart = comboBox1.Items[i].ToString();
                    var templist=new NCcodeList(dbinfo);
                    templist.ImportFromString(DbHelperSQL.getlist("select 程序Program from " + productnametrim + " where UUID='" + pppart + "'").First());
-                   templist.Check(true, false, true);
+                 
+                   CheckAndShow(templist, false, true);
+                  
                    abc.NCList.AddRange(templist.NCList);
 
                };
@@ -517,7 +458,7 @@ namespace NC_TOOL
            CheckAll(proc);
 
             unilist.NCList = abc.NCList;
-             checkdupi();
+             CheckAndShow();
             comboBox1.SelectedIndex = -1;
 
             var fastcom = from kk in dbinfo.DBfastlist.AsEnumerable()
@@ -570,126 +511,103 @@ namespace NC_TOOL
        private void tiancpara()
 
        {
-            string jingujian = "";
-
-                string jingujianshuliang = "";
-
-                Dictionary<string, string> outputlist = new Dictionary<string, string>();
-
-
-
-
-
-
-                foreach (var item in fastlist)
+            string spqtystr = "";
+            Dictionary<string, string> outputlist = new Dictionary<string, string>();
+            foreach (var item in unilist.fastList)
+            {
+                outputlist.Add(item.Key.ToString(), item.Value.ToString());
+            }
+            foreach (var item in unilist.drillList)
+            {
+                string fstname = item.Key.ToString();
+                if (outputlist.Keys.Contains(fstname))
                 {
-                    outputlist.Add(item.Key.ToString(), item.Value.ToString());
 
-                   // jingujian = "["+jingujian + item.Key.ToString() + "： " + item.Value.ToString() + " TVA:" + allfastlist[item.Key.ToString()] + "\r\n";
-
-
+                    outputlist[fstname] = outputlist[fstname] + "," + item.Value.ToString();
                 }
-              
-                foreach (var item in drilllist)
+                else
                 {
-                    string fstname=item.Key.ToString();
-                    if (outputlist.Keys.Contains(fstname))
-                    {
-                        string oldqty= outputlist[fstname];
-                        outputlist[fstname] = oldqty + "," + item.Value.ToString() ;
-                    }
-                    else
-                    {
-                        outputlist.Add(fstname, item.Value.ToString() );
-                    }
-
-
-                  //  display = display + item.Key.ToString() + "： " + item.Value.ToString() + " TVA:" + alldrilllist[item.Key.ToString()] + "\r\n";
-
+                    outputlist.Add(fstname, item.Value.ToString());
                 }
-                List<List<string>> canshu = new List<List<string>>();
+            }
+            List<List<string>> paralist = new List<List<string>>();
+            string spstr = "";
+            if (outputlist.Count() == 1)
+            {
+                var item = outputlist.First();
+                spstr = item.Key.ToString();
+                spqtystr = item.Value.ToString();
+                paralist.Add(DbHelperSQL.getlistcol("select Process_NO,Countersink_depth,Speed_of_drill,Feed_speed,Clamp_force,Clamp_relief_force,Upset_force,Upset_position,Seal_pres,Seal_time from  紧固件列表 where Fasteners='" + spstr + "'"));
 
+            }
+            else
+            {
                 foreach (var item in outputlist)
                 {
                     string fstname = item.Key.ToString();
-                   List<string> templist=(DbHelperSQL.getlistcol("select Process_NO,Countersink_depth,Speed_of_drill,Feed_speed,Clamp_force,Clamp_relief_force,Upset_force,Upset_position,Seal_pres,Seal_time from  紧固件列表 where Fasteners='" + fstname + "'"));
-
-                   canshu.Add(templist);
-                   if (outputlist.Count()==1)
-                   {
-                       jingujian = fstname;
-                       jingujianshuliang = item.Value.ToString();
-                   }
-                   else
-                   {
-                       jingujian = jingujian + "[" + fstname + "]";
-
-                       jingujianshuliang = jingujianshuliang + "[" + item.Value.ToString() + "]";
-                       // jingujian = "["+jingujian + item.Key.ToString() + "： " + item.Value.ToString() + " TVA:" + allfastlist[item.Key.ToString()] + "\r\n";
-
-                   }
-                   // canshu.Add
-                  
+                    paralist.Add(DbHelperSQL.getlistcol("select Process_NO,Countersink_depth,Speed_of_drill,Feed_speed,Clamp_force,Clamp_relief_force,Upset_force,Upset_position,Seal_pres,Seal_time from  紧固件列表 where Fasteners='" + fstname + "'"));
+                    spstr = spstr + "[" + fstname + "]";
+                    spqtystr = spqtystr + "[" + item.Value.ToString() + "]";
                 }
-                List<string> resultcanshu=new List<string> ();
-                int fstcount=canshu.Count();
-            if (fstcount==0)
+            }
+            
+
+            List<string> resultParaStr=new List<string> ();
+            int fstcount = paralist.Count();
+            if (fstcount == 0)
             {
                 return;
             }
-                for (int jj=0;jj<10;jj++)
-                    {
-                        string tempstr="";
-                    bool samepara=true;
-                    string prestr = canshu[0][jj];
-                      for(int dd=0;dd<fstcount;dd++)
+            for (int jj = 0; jj < 10; jj++)
+            {
+                string tempstr = "";
+                bool samepara = true;
+                string prestr = paralist[0][jj];
+                for (int dd = 0; dd < fstcount; dd++)
                 {
 
 
-                      if(canshu[dd][jj]!=prestr) 
-                      {
-                          samepara=false;
-
-                      }
-                          prestr=canshu[dd][jj];
-
-                  tempstr=tempstr+"[" + canshu[dd][jj]+"]";
-
-
-
-                    }
-
-                    if(samepara)
+                    if (paralist[dd][jj] != prestr)
                     {
-                        resultcanshu.Add(prestr);
+                        samepara = false;
+
                     }
-                    else
-                    {
-                         resultcanshu.Add(tempstr);
-                    }
-                   
+                    prestr = paralist[dd][jj];
+
+                    tempstr = tempstr + "[" + paralist[dd][jj] + "]";
+
 
 
                 }
-                
-                DbHelperSQL.ExecuteSql("Update " + productnametrim + " set 紧固件名称Fastener_Name='" + jingujian + "',紧固件数量Fastener_Qty='"+ jingujianshuliang+"',参数号Process_NO='"+resultcanshu[0]+"',锪窝深度Countersink_depth='"+resultcanshu[1]+"',钻头转速Speed_of_drill='"+resultcanshu[2]+"',给进速率Feed_speed='"+resultcanshu[3]+"',夹紧力Clamp_force='"+resultcanshu[4]+"',夹紧释放力Clamp_relief_force='"+resultcanshu[5]+"',墩铆力Upset_force='"+resultcanshu[6]+"',墩铆位置Upset_position='"+resultcanshu[7]+"',注胶压力Seal_pres='"+resultcanshu[8]+"',注胶时间Seal_time='"+resultcanshu[9]+"' where uuid='" + comboBox1.SelectedValue.ToString() + "'");
-         
 
-           
-       }
+                if (samepara)
+                {
+                    resultParaStr.Add(prestr);
+                }
+                else
+                {
+                    resultParaStr.Add(tempstr);
+                }
+
+
+
+            }
+
+            DbHelperSQL.ExecuteSql("Update " + productnametrim + " set 紧固件名称Fastener_Name='" + spstr + "',紧固件数量Fastener_Qty='" + spqtystr + "',参数号Process_NO='" + resultParaStr[0] + "',锪窝深度Countersink_depth='" + resultParaStr[1] + "',钻头转速Speed_of_drill='" + resultParaStr[2] + "',给进速率Feed_speed='" + resultParaStr[3] + "',夹紧力Clamp_force='" + resultParaStr[4] + "',夹紧释放力Clamp_relief_force='" + resultParaStr[5] + "',墩铆力Upset_force='" + resultParaStr[6] + "',墩铆位置Upset_position='" + resultParaStr[7] + "',注胶压力Seal_pres='" + resultParaStr[8] + "',注胶时间Seal_time='" + resultParaStr[9] + "' where uuid='" + comboBox1.SelectedValue.ToString() + "'");
+        }
 
         private void button5_Click(object sender, EventArgs e)
         {
             if (ifoldprogram)
             {
-                MessageBox.Show("目前是旧程序，请重新点击Check");
+                MessageBox.Show("目前是旧程序，请重新打开代码文本，并点击Check；或者点击上面的Operation->Re-Trim来重新检查录入所有的程序段!");
             }
             else
             {
 
-                checkdupi();
+                CheckAndShow();
                var temppro = unilist.ToString();
-                textBox1.Text = temppro;
+               // textBox1.Text = temppro;
                 tiancpara();
                 DbHelperSQL.ExecuteSql("Update " + productnametrim + " set 程序Program='" + temppro + "' where uuid='" + comboBox1.SelectedValue.ToString() + "'");
 
@@ -708,8 +626,8 @@ namespace NC_TOOL
           var partDic=  DbHelperSQL.getDic("select UUID,CONCAT(胶嘴Sealant_Tip,';',下铆头Lower_Anvil) from " + productnametrim );
             int partnum = 0;
             string lastpartname = "";
-            try
-            {
+            //try
+            //{
                 List<string> tempabc = new List<string>();
 
               
@@ -739,6 +657,7 @@ namespace NC_TOOL
                 {
                     string pppart = comboBox1.Items[i].ToString();
                     var templist = new NCcodeList(dbinfo);
+
                     //   templist.Check(true, false, true);
                     List<string> head = new List<string>();
                     head.Add(productnametrim.Replace("process", "").Replace("C0", "O") + (i + 1).ToString());
@@ -757,7 +676,13 @@ namespace NC_TOOL
                     head.Add("(MSG,START PROGRAM SEGMENT " + (i + 1).ToString() + " :" + pppart + ")");
                     head.Add("(MSG,MAKE SURE THE SEALANT TIP AND LOWER ANVIL:" + partDic[pppart] + ")");
                     templist.ImportFromString(DbHelperSQL.getlist("select 程序Program from " + productnametrim + " where UUID='" + pppart + "'").First(),false);
+                    if (templist.NCList.Count == 0)
+                    {
+                        return;
+                    }
                     templist.NCList.InsertRange(1, head);
+                    
+                   
                     templist.NCList.Insert(templist.NCList.Count-2,"(MSG,END PROGRAM SEGMENT " + (comboBox1.SelectedIndex + 1).ToString() + " :" + comboBox1.SelectedValue + ")");
                     string filename = "SEG_" + (i + 1).ToString() + "_" + pppart;
                     string filepath = savefolder + filename;
@@ -810,12 +735,12 @@ namespace NC_TOOL
                }
 
                
-            }
-            catch(Exception ee)
-            {
+            //}
+            //catch(Exception ee)
+            //{
                
-                MessageBox.Show("输出失败:"+ee.Message);
-            }
+            //    MessageBox.Show("输出失败:"+ee.Message);
+            //}
 
 
 
@@ -843,8 +768,8 @@ namespace NC_TOOL
 
         private void button4_Click_1(object sender, EventArgs e)
         {
-            List<string> abc = (List<string>)listBox1.DataSource;
-            listtotext(abc);
+           
+            ListToText();
         }
 
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
@@ -870,7 +795,7 @@ namespace NC_TOOL
                 comboBox1.SelectedIndex = i;
                
 
-                checkdupi();
+                CheckAndShow();
 
                 tiancpara();
 
@@ -882,19 +807,17 @@ namespace NC_TOOL
 
         private void reTrimToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            for (int i = 0; i < comboBox1.Items.Count; i++)
+            Action<int> proc = delegate (int i)
             {
-                comboBox1.SelectedIndex = i;
-                string value = comboBox1.SelectedValue.ToString();
-                List<string> abc1 = (List<string>)listBox1.DataSource;
-                
-            string newprogram=  listtotext (creatlist(listtotext(abc1)));
+                string pppart = comboBox1.Items[i].ToString();
+                var templist = new NCcodeList(dbinfo);
+                templist.ImportFromString(DbHelperSQL.getlist("select 程序Program from " + productnametrim + " where UUID='" + pppart + "'").First());
+                CheckAndShow(templist, false, true);
+                unilist.AddRangeToWrongList(templist.ShowWrongList);
+                DbHelperSQL.ExecuteSql("Update " + productnametrim + " set 程序Program='" + templist.ToString() + "' where uuid='" + pppart + "'");
+            };
 
-            DbHelperSQL.ExecuteSql("Update " + productnametrim + " set 程序Program='" + newprogram + "' where uuid='" + comboBox1.SelectedValue.ToString() + "'");
-
-
-
-            }
+            CheckAll(proc);
             MessageBox.Show("执行成功！");
         }
 
@@ -902,16 +825,20 @@ namespace NC_TOOL
         {
             if (listBox2.SelectedIndex != -1)
             {
-                try
-                {
-                    int indexkey =unilist.FetchWrongLineNum(listBox2.SelectedItem.ToString());
-                    listBox1.SelectedIndex = indexkey;
-                    listBox1.TopIndex = indexkey;
-                }
-                catch
-                {
+                string errmsg = listBox2.SelectedItem.ToString();
+                    int indexkey =unilist.FetchWrongLineNum(errmsg);
+                    if(indexkey>0&&indexkey<listBox1.Items.Count)
+                    {
+                        listBox1.SelectedIndex = indexkey;
+                        listBox1.TopIndex = indexkey;
 
-                }
+                    var errarray=   errmsg.Split(',');
+                    label3.Text = "Error point info:\r\nProcessFeature编号:\r\n" + errarray[3] + "." + errarray[4] + "\r\nRobotTask:" + errarray[5] + "\r\nOperation:" + errarray[6] + "\r\nGeoset:" + errarray[7] + "\r\n行号：" + errarray[8];
+
+
+                    }
+                   
+               
 
             }
         }

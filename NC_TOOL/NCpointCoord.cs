@@ -28,7 +28,11 @@ namespace NC_TOOL
             get;
             set;
         }
-
+        public string RobotTask
+        {
+            get;
+            set;
+        }
         public string Operation
         {
             get;
@@ -63,13 +67,13 @@ namespace NC_TOOL
 
         public string OutPut()
         {
-            return this.ToString() + "," +PFName+","+PFNum.ToString()+","+ Operation + ","+ Geoset + ","+ RowNum.ToString();
+            return this.ToString() + "," +PFName+","+PFNum.ToString()+","+ RobotTask+","+Operation + ","+ Geoset + ","+ RowNum.ToString();
         }
 
 
         public string[] ToArray()
         {
-            return new string[] { this.ToString() , PFName , PFNum.ToString(), Operation,Geoset , RowNum.ToString() };
+            return new string[] { this.ToString() , PFName , PFNum.ToString(), RobotTask, Operation,Geoset , RowNum.ToString() };
         }
 
 

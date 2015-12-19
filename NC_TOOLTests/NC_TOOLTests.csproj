@@ -59,9 +59,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NC_TOOL\NC_TOOL.csproj">
+    <ProjectReference Include="..\NC_TOOL\NCTools.csproj">
       <Project>{F2078848-BF40-4084-9559-492A72D17948}</Project>
-      <Name>NC_TOOL</Name>
+      <Name>NCTools</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
