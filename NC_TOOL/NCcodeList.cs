@@ -1,4 +1,4 @@
-﻿using mysqlsolution;
+﻿using GoumangToolKit;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -42,7 +42,7 @@ namespace NC_TOOL
                 codeList.Clear();
             }
 
-            var rowprocess = localMethod.ReadLines(filepath);
+            var rowprocess = FileIO.ReadLines(filepath);
 
 
             return BaseRepair(rowprocess);
@@ -334,6 +334,10 @@ namespace NC_TOOL
                             wronglist["A坐标相近," + uid + "," + lastduplipt.OutPut()]= lastduplipt.RowNum;
                             wronglist["A坐标相近," + uid + "," + instcood.OutPut()] = CoordRow;
                         }
+                        //如果不相近，则正常记录
+                       
+                           installlistfull.Add(instcood);
+                        
 
                     }
                     else
@@ -401,7 +405,7 @@ namespace NC_TOOL
                 }
                 if (dt.Rows.Count > 0)
                 {
-                    OFFICE_Method.excelMethod.SaveDataTableToExcel(dt);
+                    OfficeMethod.excelMethod.SaveDataTableToExcel(dt);
                 }
             }
             if (erroroutput)
@@ -424,7 +428,7 @@ namespace NC_TOOL
                var bb= dt.Select("错误类型<>'ProcessFeature名称错误'").Count();
                 if (dt.Rows.Count > 0&&bb>0)
                 {
-                    OFFICE_Method.excelMethod.SaveDataTableToExcel(dt);
+                    OfficeMethod.excelMethod.SaveDataTableToExcel(dt);
                 }
             }
 

@@ -31,10 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FileManagerNew, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\FileManagerNew\FileManagerNew\bin\Debug\FileManagerNew.dll</HintPath>
-    </Reference>
     <Reference Include="MySql.Data, Version=6.9.7.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\dll\MySql.Data.dll</HintPath>
@@ -42,10 +38,6 @@
     <Reference Include="Ninject, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
       <HintPath>..\..\AUTORIVET_KAOHE\packages\Ninject.3.2.2.0\lib\net40\Ninject.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="OFFICE_Method, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\OFFICE_Method\OFFICE_Method\bin\Debug\OFFICE_Method.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -101,9 +93,17 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\mysqlsolution\mysqlsolution\MySqlSolution.csproj">
+    <ProjectReference Include="..\..\FileManagerNew\FileManagerNew\FileManagerNew.csproj">
+      <Project>{ceb6bed3-31cd-4315-9f2d-f5ebf1cdf89a}</Project>
+      <Name>FileManagerNew</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\GoumangToolKit\goumangToolKit\GoumangToolKit.csproj">
       <Project>{41f56599-8d65-48b1-ac56-99e8d146bc2d}</Project>
-      <Name>MySqlSolution</Name>
+      <Name>GoumangToolKit</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\GoumangToolKit\OfficeMethod\OfficeMethod.vbproj">
+      <Project>{78d7e043-4963-44c0-9631-9e9549eafe91}</Project>
+      <Name>OfficeMethod</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

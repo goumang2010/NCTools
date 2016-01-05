@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using mysqlsolution;
+using GoumangToolKit;
 
 
 namespace NC_TOOL
@@ -79,7 +79,7 @@ namespace NC_TOOL
             {
         
 
-                var tmplist = from x in localMethod.ReadLines(filepath)
+                var tmplist = from x in FileIO.ReadLines(filepath)
                               let y = x.Trim()
                               where y != "" && (!y.Contains("#"))
                               select y;

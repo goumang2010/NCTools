@@ -13,8 +13,8 @@ namespace NC_TOOL
         string CurrentBatch { get; }
 
         string StationNum { get; }
-        string ProcessPath { get; }
-        string TVApath { get; }
+        //string ProcessPath { get; }
+        //string TVApath { get; }
 
 
 

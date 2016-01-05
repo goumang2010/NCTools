@@ -9,7 +9,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using mysqlsolution;
+using GoumangToolKit;
 
 
 
@@ -183,9 +183,9 @@ namespace NC_TOOL
           tianchong.Add(productnametrim,AutorivetDB.getparatable(productnametrim));
             //  tianchongname.Add(productnametrim);
 
-            OFFICE_Method.excelMethod.SaveDataTableToExcelTran(tianchong);
+            OfficeMethod.excelMethod.SaveDataTableToExcelTran(tianchong);
 
-          //  OFFICE_Method. excelMethod.SaveDataTableToExcel(tianchong);
+          //  OfficeMethod. excelMethod.SaveDataTableToExcel(tianchong);
           //   MsgBox("执行成功")
         }
   
@@ -563,7 +563,7 @@ namespace NC_TOOL
         private void button14_Click(object sender, EventArgs e)
         {
             DataTable tmpdt = (DataTable)dataGridView2.DataSource;
-            OFFICE_Method.excelMethod.SaveDataTableToExcel(tmpdt);
+            OfficeMethod.excelMethod.SaveDataTableToExcel(tmpdt);
 
         }
 
@@ -600,7 +600,7 @@ namespace NC_TOOL
         {
             DataTable tmpdt = DbHelperSQL.Query("select * from 试片列表 where 产品图号='" + prodname + "'").Tables[0];
 
-            OFFICE_Method.excelMethod.SaveDataTableToExcel(tmpdt);
+            OfficeMethod.excelMethod.SaveDataTableToExcel(tmpdt);
            // excelMethod.SaveDataTableToExcel(tmpdt);
         }
 

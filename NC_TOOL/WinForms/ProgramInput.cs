@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using FileManagerNew;
 using System.Security.Cryptography;
-using mysqlsolution;
+using GoumangToolKit;
 
 namespace NC_TOOL
 {

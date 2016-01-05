@@ -59,18 +59,22 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NC_TOOL\NCTools.csproj">
-      <Project>{F2078848-BF40-4084-9559-492A72D17948}</Project>
-      <Name>NCTools</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="TestFiles\WRONG_NC">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="TestFiles\NC_CODES">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\GoumangToolKit\goumangToolKit\GoumangToolKit.csproj">
+      <Project>{41f56599-8d65-48b1-ac56-99e8d146bc2d}</Project>
+      <Name>GoumangToolKit</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NC_TOOL\NCTools.csproj">
+      <Project>{f2078848-bf40-4084-9559-492a72d17948}</Project>
+      <Name>NCTools</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
