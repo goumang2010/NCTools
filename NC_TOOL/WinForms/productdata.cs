@@ -210,11 +210,12 @@ namespace NC_TOOL
 
         private void button1_Click_1(object sender, EventArgs e)
         {
-           
-           var f1 = new program_input();
+            //程序输入窗口
+            ProgramInput f1 = new ProgramInput();
+            //eg. textBox1.Text=C02312100process
+            //传入图号
             f1.inputValue = textBox1.Text;
             f1.Show();
-        
             this.Close();
 
 

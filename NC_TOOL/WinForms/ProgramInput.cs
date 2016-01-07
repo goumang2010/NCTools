@@ -15,11 +15,11 @@ using GoumangToolKit;
 
 namespace NC_TOOL
 {
-    public partial class program_input : Form
+    public partial class ProgramInput : Form
     {
         DBInfo dbinfo;
         NCcodeList unilist;
-        public program_input()
+        public ProgramInput()
         {
             InitializeComponent();
             dbinfo = new DBInfo();
@@ -65,13 +65,15 @@ namespace NC_TOOL
         }
         public string inputValue
         {
-           
 
+            //eg. value=C02312100process
             set
             {
 
                 if (value=="")
                 {
+                    //传入空字符串，那么就把和产品相关的控件隐藏
+                    //屏蔽数据库功能，只进行NC代码检查
                     menuStrip1.Visible = false;
                     button5.Visible = false;
                     comboBox1.Visible = false;
@@ -82,95 +84,57 @@ namespace NC_TOOL
                 else
                 {
                     menuStrip1.Visible = true;
-                  button5.Visible = true;
+                    button5.Visible = true;
                     comboBox1.Visible = true;
                     checkBox3.Visible = true;
 
                    
                 }
-                loadtable(value);
+                LoadTable(value);
                
             }
         }
-
-        private void loadtable(string productname)
+        /// <summary>
+        /// 从数据库中取出产品相关的紧固件数量信息
+        /// </summary>
+        /// <param name="productName">eg. C02312100process</param>
+        private void LoadTable(string productName)
         {
-            if(productname!="")
+            //如果传入图号不为空，执行页面初始化操作
+            if (productName != "")
             {
-                string prodnametrim = productname.Replace("process", "");
-                this.Text = AutorivetDB.queryno(prodnametrim, "程序编号");
-
-                dbinfo.DBfastlist=AutorivetDB.TVA_fstlist(prodnametrim, "INSTALLED BY").AsEnumerable().ToDictionary(k=>k[0].ToString(),v=>System.Convert.ToInt32( v[1].ToString()));
-                dbinfo.DBdrilllist= AutorivetDB.TVA_fstlist(prodnametrim, "DRILL ONLY BY").AsEnumerable().ToDictionary(k => k[0].ToString(), v => System.Convert.ToInt32(v[1].ToString()));
-
-
-
-                //  DbHelperSQL.Query("select FastenerName,count(*) as qty from " + productname.Replace("process", "") + " WHERE ProcessType like '%DRILL ONLY BY%' group by FastenerName order by FastenerName").Tables[0];
+                //e.g. C02312100
+                string prodNameTrim = productName.Replace("process", "");
+                //查询程序编号
+                //执行sql语句 select 程序编号 from 产品列表 where 图号 like 'C02312100%'
+                this.Text = AutorivetDB.QueryNo(prodNameTrim, "程序编号");
+                //select FastenerName,count(*) as qty from C02312100 WHERE ProcessType like '%INSTALLED BY%' group by FastenerName order by FastenerName
+                dbinfo.DBfastlist = AutorivetDB.TVA_fstlist(prodNameTrim, "INSTALLED BY").AsEnumerable().ToDictionary(k => k[0].ToString(), v => System.Convert.ToInt32(v[1].ToString()));
+                dbinfo.DBdrilllist = AutorivetDB.TVA_fstlist(prodNameTrim, "DRILL ONLY BY").AsEnumerable().ToDictionary(k => k[0].ToString(), v => System.Convert.ToInt32(v[1].ToString()));
+                //显示TVA中紧固件数量
                 string fstdisplay = "TVA紧固件安装数量:\r\n";
-            foreach(var pp in dbinfo.DBfastlist)
-            {
-                int tempqty=System.Convert.ToInt16(pp.Value.ToString());
-                fstdisplay = fstdisplay +pp.Key+ "  ： " + pp.Value.ToString() + "\r\n";
-              //  allfastlist.Add(pp.Key.ToString(),tempqty);
-               
-              
-            }
-            fstdisplay = fstdisplay + "钻孔的(drill):\r\n";
+                foreach (var pp in dbinfo.DBfastlist)
+                {
+                    int tempqty = System.Convert.ToInt16(pp.Value.ToString());
+                    fstdisplay = fstdisplay + pp.Key + "  ： " + pp.Value.ToString() + "\r\n";
+                }
+                fstdisplay = fstdisplay + "钻孔的(drill):\r\n";
 
-            foreach (var pp in dbinfo.DBdrilllist)
-            {
-                int tempqty = System.Convert.ToInt16(pp.Value.ToString());
-                fstdisplay = fstdisplay + pp.Key + "  ： " + pp.Value + "\r\n";
-              //  alldrilllist.Add(pp.Key.ToString(), tempqty);
+                foreach (var pp in dbinfo.DBdrilllist)
+                {
+                    int tempqty = System.Convert.ToInt16(pp.Value.ToString());
+                    fstdisplay = fstdisplay + pp.Key + "  ： " + pp.Value + "\r\n";
+                }
+                label7.Text = fstdisplay;
+                productnametrim = productName;
+                //获取产品的中文名称
+                prodchnname = AutorivetDB.QueryNo(productnametrim, "名称");
 
-               // tvadrillqty = tvadrillqty + tempqty;
-                // tvaqty=
-            }
-
-
-
-            label7.Text = fstdisplay;
-
-            try
-            {
-
-                productnametrim = productname;
-                  prodchnname = AutorivetDB.queryno(productnametrim, "名称");
-
-                    MySqlConnection MySqlConn = new MySqlConnection(PubConstant.ConnectionString);
-                MySqlConn.Open();
-                String sql = "SELECT uuid FROM  " + productnametrim +" order by ID";
-                program_part = DbHelperSQL.getlist(sql);
-
-
+                string sql = "SELECT uuid FROM  " + productnametrim + " order by ID";
+                program_part = DbHelperSQL.getList(sql);
                 comboBox1.DataSource = program_part;
 
-
-                //   this.dataGridView1.DataSource = dt;
-
             }
-            catch
-            {
-                MessageBox.Show("当前数据库不可用，请更换数据库");
-
-            }
-
-            }
-
-            else
-            {
-                DataTable fsttemp = DbHelperSQL.Query("select Fasteners from 紧固件列表").Tables[0];
-                foreach (DataRow pp in fsttemp.Rows)
-                {
-                   // allfastlist.Add(pp[0].ToString(), 0);
-                   // alldrilllist.Add(pp[0].ToString(), 0);
-
-
-                }
-
-            }
-
-
         }
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
@@ -184,7 +148,7 @@ namespace NC_TOOL
             if(comboBox1.SelectedIndex!=-1)
             {       
             string pppart = comboBox1.SelectedValue.ToString();
-              unilist.ImportFromString( DbHelperSQL.getlist("select 程序Program from " + productnametrim + " where UUID='" + pppart + "'").First() );
+              unilist.ImportFromString( DbHelperSQL.getList("select 程序Program from " + productnametrim + " where UUID='" + pppart + "'").First() );
               CheckAndShow();
             }
             }
@@ -447,7 +411,7 @@ namespace NC_TOOL
                {
                    string pppart = comboBox1.Items[i].ToString();
                    var templist=new NCcodeList(dbinfo);
-                   templist.ImportFromString(DbHelperSQL.getlist("select 程序Program from " + productnametrim + " where UUID='" + pppart + "'").First());
+                   templist.ImportFromString(DbHelperSQL.getList("select 程序Program from " + productnametrim + " where UUID='" + pppart + "'").First());
                  
                    CheckAndShow(templist, false, true);
                   
@@ -675,7 +639,7 @@ namespace NC_TOOL
                     }
                     head.Add("(MSG,START PROGRAM SEGMENT " + (i + 1).ToString() + " :" + pppart + ")");
                     head.Add("(MSG,MAKE SURE THE SEALANT TIP AND LOWER ANVIL:" + partDic[pppart] + ")");
-                    templist.ImportFromString(DbHelperSQL.getlist("select 程序Program from " + productnametrim + " where UUID='" + pppart + "'").First(),false);
+                    templist.ImportFromString(DbHelperSQL.getList("select 程序Program from " + productnametrim + " where UUID='" + pppart + "'").First(),false);
                     if (templist.NCList.Count == 0)
                     {
                         return;
@@ -811,7 +775,7 @@ namespace NC_TOOL
             {
                 string pppart = comboBox1.Items[i].ToString();
                 var templist = new NCcodeList(dbinfo);
-                templist.ImportFromString(DbHelperSQL.getlist("select 程序Program from " + productnametrim + " where UUID='" + pppart + "'").First());
+                templist.ImportFromString(DbHelperSQL.getList("select 程序Program from " + productnametrim + " where UUID='" + pppart + "'").First());
                 CheckAndShow(templist, false, true);
                 unilist.AddRangeToWrongList(templist.ShowWrongList);
                 DbHelperSQL.ExecuteSql("Update " + productnametrim + " set 程序Program='" + templist.ToString() + "' where uuid='" + pppart + "'");

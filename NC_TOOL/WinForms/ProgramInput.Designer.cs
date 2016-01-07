@@ -1,6 +1,6 @@
 ﻿namespace NC_TOOL
 {
-    partial class program_input
+    partial class ProgramInput
     {
         /// <summary>
         /// Required designer variable.
